@@ -2,8 +2,9 @@
 #define STACK_HPP
 
 #include <iostream>
-#include <algorithm>
 #include <stdexcept>
+#include <algorithm>
+#include <utility>
 
 template <typename T>
 class stack
@@ -11,111 +12,135 @@ class stack
 public:
 	stack();
 	~stack();
-	stack(stack<T> const&);
-	stack& operator=(stack<T> const&);
+	stack(size_t size);
+	stack(stack<T> const &copy);
+	stack<T>& operator = (stack<T> const &other);
 	size_t count() const;
 	size_t array_size() const;
-	void push(T const&);
+	void swap(stack<T>& other);
+	void push(T const &);
 	T pop();
-	T last()const;
-	void print(std::ostream&stream)const;
-	friend std::ostream&operator << (std::ostream&stream, const stack<T>&);
-	void swap(stack<T>&);
+	std::ostream& print(std::ostream& os);
+			
+	friend std::ostream& operator<< (std::ostream& os, stack<T>& obj);
+	
 private:
-	T * array_;
+	T* array_;
 	size_t array_size_;
 	size_t count_;
 };
 
 template <typename T>
-void stack<T>::swap(stack<T>& other)
+stack<T>::stack() : count_(0), array_size_(0), array_(nullptr)
+{}
+
+template <typename T>
+stack<T>::stack(size_t size)
 {
-	std::swap(array_, other.array_);
-	std::swap(array_size_, other.array_size_);
-	std::swap(count_, other.count_);
+        count_ = size;
+        array_size_ = size;;
+        array_ = new T[size]();
+}
+	
+
+template <typename T>
+stack<T>::stack(stack<T> const &copy)
+{
+	array_size_ = copy.array_size_;
+	count_ = copy.count_;
+	array_ = new T[array_size_];
+
+	std::copy(copy.array_, copy.array_ + copy.array_size_, array_);
 }
 
 template <typename T>
-stack<T>::stack() : array_{ nullptr }, array_size_{ 0 }, count_{ 0 } {}
+stack<T>& stack<T>::operator=(stack<T> const &other)
+{
+	if (this != &other)
+	{
+		stack<T> temp(other);
+		swap(temp);
+	}
+	return *this;
+}
+
 template <typename T>
 stack<T>::~stack()
 {
 	delete[] array_;
 }
-template <typename T>
-stack<T>::stack(stack<T> const& other)
-{
-	array_size_ = other.array_size_;
-	count_ = other.count_;	
-	std::copy(other.array_, other.array_ + count_, array_);
-}
-template <typename T>
-auto stack<T>::operator=(stack<T> const & other) -> stack&
-{
-	if (&other != this)
-		stack(other).swap(*this);
-	return *this;
-}
-template <typename T>
-size_t stack<T>::array_size() const
-{
-	return array_size_;
-}
+
 template <typename T>
 size_t stack<T>::count() const
 {
 	return count_;
 }
+
 template <typename T>
-void stack<T>::push(T const & value)
+size_t stack<T>::array_size() const
+{
+	return array_size_;
+}
+
+template <typename T>
+void stack<T>::push(T const &value)
 {
 	if (array_size_ == 0)
 	{
 		array_size_ = 1;
-		array_ = new T[array_size_]();
+		array_ = new T[array_size_];
 	}
-	else if (array_size_ == count_)
+	else if (count_ + 1 >= array_size_)
 	{
-		array_size_ *= 2;
-		T * new_array = new T[array_size_]();
-		std::copy(array_, array_ + count_, new_array);
+		array_size_ = array_size_ * 2;
+		T* temp = new T[array_size_];
+		std::copy(array_, array_ + count_, temp);
+
 		delete[] array_;
-		array_ = new_array;
+
+		array_ = temp;
 	}
 	array_[count_++] = value;
 }
+
 template <typename T>
 T stack<T>::pop()
 {
 	if (count_ == 0)
-		throw "Stack is empty";
+		throw std::logic_error("Stack is empty! Try again!\n");
 	else
 	{
-		T * new_array = new T[array_size_]();
-		T value = array_[--count_];
-		std::copy(array_, array_ + count_, new_array);
-		delete[] array_;
-		array_ = new_array;
-		return value;
+		T temp = array_[--count_];
+
+		return temp;
 	}
 }
+
 template <typename T>
-T stack<T>::last()const
+std::ostream& stack<T>::print(std::ostream& os)
 {
 	if (count_ == 0)
-		throw "Stack is empty";
-	else return array_[count_ - 1];
+		os << "Stack is empty! Try again!\n";
+	else
+		for (unsigned int i = 0; i < count_; i++)
+		{
+			os << array_[i] << "\t";
+		}
+	
+	return os;
 }
+
 template <typename T>
-void stack<T>::print(std::ostream&stream)const
+std::ostream& operator<< (std::ostream& os, stack<T>& obj)
 {
-	for (unsigned int i = 0; i < count_; ++i)
-		stream << array_[i] << " ";
-	stream << std::endl;
+	return obj.os(os);
 }
+
 template <typename T>
-std::ostream& operator << (std::ostream&stream, const stack<T>&stack_)
+void stack<T>::swap(stack<T>& other)
 {
-	return stack_.print(stream);
+	std::swap(array_, other.array_);
+    	std::swap(array_size_, other.array_size_);
+	std::swap(count_, other.count_);
 }
 #endif
