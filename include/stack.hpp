@@ -17,9 +17,9 @@ private:
 };
 
 template <typename T>
-stack<T>::stack() : 
-	m_ptr{ nullptr }, 
-	m_size{ 0UL }, 
+stack<T>::stack() :
+	m_ptr{ nullptr },
+	m_size{ 0UL },
 	m_count{ 0UL }
 {
 }
