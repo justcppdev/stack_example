@@ -1,29 +1,39 @@
-#ifndef STACK_HPP 
+#ifndef STACK_HPP
 #define STACK_HPP
 
 template <typename T>
 class stack
 {
 public:
-    using size_type = std::size_t;
-    
-    stack();
-    bool empty() const;
+	using size_type = std::size_t;
+
+	stack();
+	~stack();
+	bool empty() const;
 private:
-    T * buffer_;
-    size_type buffer_size_;
-    size_type count_;
+	T * m_ptr;
+	size_type m_size;
+	size_type m_count;
 };
 
 template <typename T>
-stack<T>::stack() : buffer_{ nullptr }, buffer_size_ { 0UL }, count_{ 0UL }
+stack<T>::stack() : 
+	m_ptr{ nullptr }, 
+	m_size{ 0UL }, 
+	m_count{ 0UL }
 {
+}
+
+template <typename T>
+stack<T>::~stack()
+{
+	delete [] m_ptr;
 }
 
 template <typename T>
 bool stack<T>::empty() const
 {
-    return count_ == 0;    
+	return m_count == 0;
 }
 
 #endif
